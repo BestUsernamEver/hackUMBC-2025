@@ -165,7 +165,7 @@ async def get_local_events():
     info = await get_information(url, extract_info, err_info)
     
 
-async def get_general_summary():
+async def get_general_summary(location):
     err_info = ErrorInfo(
         err_msg = "There is currently no text in this page.",
         css_selector = ".noarticletext"
@@ -176,19 +176,19 @@ async def get_general_summary():
         schema = Summary.model_json_schema(),
         css_selector = ".mw-content-ltr"
     )
-    url = "https://en.wikivoyage.org/wiki/Paris"
+    url = f"https://en.wikivoyage.org/wiki/{location}"
     info = await get_information(url, extract_info, err_info)
 
 async def main():
     load_dotenv()
 
-    #await get_general_summary()
+    await get_general_summary("Bowie")
     #await get_local_events()
 
     #await get_general_summary()
 
     #await get_path()
-    await get_hotel_info() 
+    #await get_hotel_info() 
 
 
 if __name__ == "__main__":
