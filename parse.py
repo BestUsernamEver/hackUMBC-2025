@@ -38,7 +38,7 @@ MD_GENERATOR = DefaultMarkdownGenerator(
 # Initialize environment variables
 load_dotenv()
 
-# I'm too lazy to import dataclasses and make everything actually good. 
+# Classes for storing information regarding checking existence and extraction options
 class ErrorInfo:
     def __init__(self, err_msg, css_selector):
         self.err_msg = err_msg 
@@ -50,6 +50,7 @@ class ExtractInfo:
         self.schema = schema 
         self.css_selector = css_selector
 
+# Pydantic models for literally everything
 class Summary(BaseModel):
     history: str 
     transportation: str 
@@ -86,8 +87,8 @@ class Attraction(BaseModel):
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 def get_attraction_info(location, goal):
-    # Surprise, we're just going to call the AI outright here because TripAdvisor and Booking and Expedia are
-    # all out to try to kill me :( This is horrid btw
+    # We just call the AI here outright because all the actually good sites for scraping attractions
+    # have annoying anti-bot stuffs.
     response = client.models.generate_content(
         model = "gemini-2.5-flash",
         contents = f"Describe 4 (or less, depends on what is available) different attractions at {location} that align with the user's goal of visiting, which is: {goal}",
@@ -99,6 +100,7 @@ def get_attraction_info(location, goal):
     return response.text
 
 async def check_existence(url, fail_msg, selector):
+    # Check for a css selector that isolates a potential error message.
     run_config = CrawlerRunConfig(
         css_selector = selector,
     )
@@ -108,7 +110,9 @@ async def check_existence(url, fail_msg, selector):
             url = url,
             config = run_config
         )
-        
+
+        # Crawl the page, looking for the site-specific error message within the
+        # cleaned HTML.
         if not result.success:
             return False 
         
@@ -119,13 +123,15 @@ async def check_existence(url, fail_msg, selector):
 
 async def get_information(url, extract_info, err_info = None):
     if err_info:
+        # If we provide any sort of error info, we should use it to check the existence of our
+        # URL input. (ex. If the user puts in gibberish, we can't scrape anything)
         events_exist = await check_existence(url, err_info.err_msg, err_info.css_selector)
         if not events_exist: return None 
-
+    
     extraction_strategy = LLMExtractionStrategy(
         llm_config = LLMConfig(provider = "gemini/gemini-2.0-flash", api_token = os.getenv("GEMINI_API_KEY")),
         extraction_type = "schema",
-        schema = TravelPath.model_json_schema(),
+        schema = extract_info.schema, #TravelPath.model_json_schema()
         instruction = extract_info.instruction,
         overlap_rate = 0.0,
         apply_chunking = False,
@@ -179,7 +185,7 @@ async def get_path(location, origin):
     return info
 
 async def get_local_events(location, goal):
-    err_info = ErrorInfo( # there was a note here but i think it's irrelvant now but if it becomes weird just know 
+    err_info = ErrorInfo( 
         err_msg = "Whoops, the page or event you are looking for was not found.",
         css_selector = "h1"
     )
@@ -209,19 +215,3 @@ async def get_general_summary(location):
     url = f"https://en.wikivoyage.org/wiki/{location}"
     info = await get_information(url, extract_info, err_info)
     return info
-
-'''
-async def main():
-    #await get_general_summary("Bowie")
-    #print(await get_local_events("Bowie", "to embrace the arts"))
-
-    #await get_general_summary()
-
-    #await get_path()
-    #print(await get_hotel_info('Bowie', '2025-09-28', '2025-09-30', 1, 1) )
-
-if __name__ == "__main__":
-    asyncio.run(main())
-'''
-
-print(get_attraction_info("Carson City", "sightseeing"))

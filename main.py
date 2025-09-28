@@ -13,7 +13,7 @@ app = Flask(__name__)
 @app.route("/", methods = ["GET", "POST"])
 def landing_page():
     if request.method == "POST":
-        # horrid but we move anyway
+        # Get the parameters from the form POST request
         location = request.form.get("location")
         origin = request.form.get("origin")
         num_of_people = request.form.get("num_of_companions")
@@ -22,7 +22,7 @@ def landing_page():
         num_of_rooms = request.form.get("num_of_rooms")
         trip_goal = request.form.get("purpose")
 
-        # It's 7:50 now (wholly sentient) and i would figure out a better way but i dont want to 
+        # Format each result from parse.py
         summary_result = asyncio.run(get_general_summary(location))
         formatted_summary = json.loads(summary_result)
 
@@ -38,9 +38,10 @@ def landing_page():
         attractions_result = get_attraction_info(location, trip_goal)
         formatted_attractions = json.loads(attractions_result)
 
+        # Send em in
         return render_template(
             "data.html", 
-            summary = formatted_summary[0], #??? Yeah deal with it
+            summary = formatted_summary[0], 
             routes = formatted_routes,
             events = formatted_events,
             hotels = formatted_hotels,
