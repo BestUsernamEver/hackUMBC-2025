@@ -61,7 +61,6 @@ class Event(BaseModel):
     name: str 
     time: str 
     area: str 
-    relevant: bool
     #price: str
 
 class EventList(BaseModel):
@@ -71,7 +70,6 @@ class TravelPath(BaseModel):
     travel_methods: str 
     time: str 
     price_range: str
-    relevant: bool
 
 class Hotel(BaseModel):
     hotel_name: str 
@@ -80,7 +78,6 @@ class Hotel(BaseModel):
     per_night_price: str 
     miles_from_downtown: str 
     extra_info: str
-    relevant: bool
 
 class Attraction(BaseModel):
     name: str 
@@ -93,7 +90,7 @@ def get_attraction_info(location, goal):
     # all out to try to kill me :( This is horrid btw
     response = client.models.generate_content(
         model = "gemini-2.5-flash",
-        contents = f"Describe 10 (or less, depends on what is available) different attractions at {location} that align with the user's goal of visiting, which is: {goal}",
+        contents = f"Describe 4 (or less, depends on what is available) different attractions at {location} that align with the user's goal of visiting, which is: {goal}",
         config = {
             "response_mime_type": "application/json",
             "response_schema": list[Attraction]
@@ -160,7 +157,7 @@ async def get_information(url, extract_info, err_info = None):
 
 async def get_hotel_info(location, start, end, goal, person_num=1, room_num=1):
     extract_info = ExtractInfo(
-        instruction = f"For each listed hotel, extract its name (\"hotel_name\"), review score (\"review_score\"), prices (\"per_night_price\" and \"total_price\"), number of miles from downtown (\"miles_from_downtown\"), and any extra info (\"extra_info\") that might be important. Mark the hotel as relevant if it especially aligns with the user's purpose of visiting, which is: {goal}",
+        instruction = f"For the top 4 listed hotels that align with the user's purpose of visiting, which is: {goal}, extract its name (\"hotel_name\"), review score (\"review_score\"), prices (\"per_night_price\" and \"total_price\"), number of miles from downtown (\"miles_from_downtown\"), and any extra info (\"extra_info\") that might be important.",
         schema = Hotel.model_json_schema(),
         css_selector = ".cca574b93c"
     )
@@ -188,7 +185,7 @@ async def get_local_events(location, goal):
     )
 
     extract_info = ExtractInfo(
-        instruction = f"Extract the name (\"name\"), time (\"time\"), area (\"area\"), and price (\"price\") of each listed event. Mark the event as relevant if it especially aligns with the user's purpose of visiting, which is: {goal}",
+        instruction = f"Extract the name (\"name\"), time (\"time\"), area (\"area\"), and price (\"price\") of the top 4 listed events that align with the user's purpose of visiting, which is: {goal}",
         schema = EventList.model_json_schema(),
         css_selector = ".SearchResultPanelContentEventCardList-module__eventList___2wk-D"
     )

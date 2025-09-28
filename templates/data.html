@@ -23,9 +23,9 @@
         <section>
             <ul>
             {% for route in routes %}
-                <li><strong>{{route.travel_methods}}</strong></li>
-                <li>{{route.time}}</li>
-                <li>{{route.price_range}}</li>
+                <h3>{{route.travel_methods}}</h3>
+                <p>{{route.time}} • {{route.price_range}}</p>
+                <br>
             {% endfor %}
             </ul>
         </section>
@@ -35,8 +35,8 @@
         {% for attraction in attractions %}
             <h3>{{attraction.name}}</h3>
             <ul>
-                <li>{{attraction.location}}</li>
-                <li>{{attraction.description}}</li>  
+                <li>Location: {{attraction.location}}</li>
+                <li>Description: {{attraction.description}}</li>  
             </ul>
         {% endfor %}
         </section>
@@ -44,27 +44,19 @@
         <h1>Local/upcoming events in the area:</h1>
         <section>
         {% for event in events %}
-            {% if event.relevant %}
-                <h3 style="color: red;">{{event.name}}</h3>
-            {% else %}
-                <h3 style="color: black;">{{event.name}}</h3>
-            {% endif %}
-            <p>{{event.time}}</p>
-            <p>{{event.area}}</p> 
+            <h3>{{event.name}}</h3>
+            <p>Time: {{event.time}}</p>
+            <p>Area: {{event.area}}</p> 
         {% endfor %}
         </section> 
 
         <h1>Find a place to stay:</h1>
         <section>
         {% for hotel in hotels %}
-            {% if hotel.relevant %}
-                <h3 style="color: red;">{{hotel.hotel_name}}</h3>
-            {% else %}
-                <h3 style="color: black;">{{hotel.hotel_name}}</h3>
-            {% endif %}
-            <p>{{hotel.review_score}}</p>
-            <p>{{hotel.per_night_price}} per night</p> 
-            <p>{{hotel.total_price}}</p>
+            <h3>{{hotel.hotel_name}}</h3>
+            <p>Review Rating: {{hotel.review_score}}</p>
+            <p>Price per Night: {{hotel.per_night_price}}</p> 
+            <p>Total Price: {{hotel.total_price}}</p>
             <p>{{hotel.miles_from_downtown}}m from downtown</p>
             <p>{{hotel.extra_info}}</p>
         {% endfor %}
