@@ -33,6 +33,8 @@ MD_GENERATOR = DefaultMarkdownGenerator(
     }
 )
 
+load_dotenv()
+
 # I'm too lazy to import dataclasses and make everything actually good.
 class ErrorInfo:
     def __init__(self, err_msg, css_selector):
@@ -69,8 +71,9 @@ class TravelPath(BaseModel):
 class Hotel(BaseModel):
     hotel_name: str 
     review_score: int 
-    prices: str 
-    miles_from_downtown: int 
+    total_price: str
+    per_night_price: str 
+    miles_from_downtown: str 
     extra_info: str
 
 async def check_existence(url, fail_msg, selector):
@@ -113,7 +116,8 @@ async def get_information(url, extract_info, err_info = None):
         extraction_strategy = extraction_strategy,
         cache_mode = CacheMode.BYPASS,
         markdown_generator = MD_GENERATOR,
-        only_text = True
+        only_text = True,
+        wait_for = extract_info.css_selector # Note: needed for getpath, make workaround if needs to be removed
     )
 
     async with AsyncWebCrawler(crawler_strategy = CRAWLER_STRATEGY, config = BROWSER_CONFIG) as crawler:
@@ -124,33 +128,36 @@ async def get_information(url, extract_info, err_info = None):
         
         if result.success:
             #print(result.markdown)
-            print(result.extracted_content)
+            return result.extracted_content
             #extraction_strategy.show_usage()    
         else:
             print("We were unable to properly result the thing or something?")
 
-async def get_hotel_info():
+async def get_hotel_info(location, start, end, person_num=1, room_num=1):
     extract_info = ExtractInfo(
         instruction = "For each listed hotel, extract its name, review score, prices (time-specific and per night), number of miles from downtown, and any extra info that might be important.",
         schema = Hotel.model_json_schema(),
         css_selector = ".cca574b93c"
     )
 
-    url = "https://www.booking.com/searchresults.html?ss=New+York%2C+United+States&ssne=Baltimore&ssne_untouched=Baltimore&label=gen173nr-10CAQoggJCEHNlYXJjaF9iYWx0aW1vcmVIM1gEaJkCiAEBmAEzuAEXyAEM2AED6AEB-AEBiAIBqAIBuAKU9uLGBsACAdICJDEyODA3MzgzLTVjMWQtNDA2NS05ZWJkLWJiMWRiNDIwNTNiYtgCAeACAQ&aid=304142&lang=en-us&sb=1&src_elem=sb&src=searchresults&dest_id=20088325&dest_type=city&checkin=2025-10-01&checkout=2025-10-07&group_adults=3&no_rooms=1&group_children=0"
+    # I hate children so we're going to assume they don't exist. Too bad!
+    url = f"https://www.booking.com/searchresults.html?ss={location}&dest_type=city&checkin={start}&checkout={end}&group_adults={person_num}&no_rooms={room_num}&group_children=0"
     info = await get_information(url, extract_info)
+    return info
 
-async def get_path():
+async def get_path(location, origin):
     extract_info = ExtractInfo(
-        instruction = "For each listed way to travel, extract the travel methods, the predicted time spent, and the cost range.",
+        instruction = "For each listed way to travel, extract the travel methods, the predicted time spent, and the cost range",
         schema = TravelPath.model_json_schema(),
         css_selector = ".rounded-tr-md"
     )
 
-    url = "https://www.rome2rio.com/map/Las-Vegas/Baltimore"
+    url = f"https://www.rome2rio.com/map/{origin}/{location}"
     info = await get_information(url, extract_info)
+    return info
 
-async def get_local_events():
-    err_info = ErrorInfo( # Note: This is useless before you have to do a wait_for! Just handle it afterward cuz fu
+async def get_local_events(location):
+    err_info = ErrorInfo( # there was a note here but i think it's irrelvant now but if it becomes weird just know 
         err_msg = "Whoops, the page or event you are looking for was not found.",
         css_selector = "h1"
     )
@@ -161,8 +168,9 @@ async def get_local_events():
         css_selector = ".SearchResultPanelContentEventCardList-module__eventList___2wk-D"
     )
 
-    url = "https://www.eventbrite.com/d/md--bowie/all-events/"
+    url = f"https://www.eventbrite.com/d/{location}/all-events/"
     info = await get_information(url, extract_info, err_info)
+    return info
     
 
 async def get_general_summary(location):
@@ -172,24 +180,23 @@ async def get_general_summary(location):
     )
 
     extract_info = ExtractInfo(
-        instruction = "Extract short summary from the article about the destination's history, transportation, things to do (specific for someone who enjoys the arts), food, and hotels. If there is no/insufficient information on a topic, replace with 'Not specified'.",
+        instruction = "Extract short summary from the article about the destination's history, transportation, things to do, food, and hotels. If there is no/insufficient information on a topic, replace with 'Little information.'.",
         schema = Summary.model_json_schema(),
         css_selector = ".mw-content-ltr"
     )
     url = f"https://en.wikivoyage.org/wiki/{location}"
     info = await get_information(url, extract_info, err_info)
+    return info
 
+'''
 async def main():
-    load_dotenv()
-
-    await get_general_summary("Bowie")
+    #await get_general_summary("Bowie")
     #await get_local_events()
 
     #await get_general_summary()
 
     #await get_path()
-    #await get_hotel_info() 
-
+    print(await get_hotel_info('Bowie', '2025-09-28', '2025-09-30', 1, 1) )
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(main())'''

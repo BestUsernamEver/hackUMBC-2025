@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <h1>Summary:</h1>
+        <section>
+            <h2>History</h2>
+            <p>{{summary.history}}</p>
+            <h2>Transportation</h2>
+            <p>{{summary.transportation}}</p>
+            <h2>Things to Do</h2>
+            <p>{{summary.things_to_do}}</p>
+            <h2>Food</h2>
+            <p>{{summary.food}}</p>
+            <h2>Hotels</h2>
+            <p>{{summary.hotels}}</p>
+        </section>
+
+        <h1>Travel there:</h1>
+        <section>
+            <ul>
+            {% for route in routes %}
+                <li>{{route.travel_methods}}</li>
+                <li>{{route.time}}</li>
+                <li>{{route.price_range}}</li>
+            {% endfor %}
+            </ul>
+        </section>
+
+        <h1>Local events in the area:</h1>
+        <section>
+        {% for event in events %}
+            <h3>{{event.name}}</h3>
+            <p>{{event.time}}</p>
+            <p>{{event.area}}</p> 
+        {% endfor %}
+        </section> 
+
+        <h1>Find a place to stay:</h1>
+        <section>
+        {% for hotel in hotels %}
+        <h3>{{hotel.hotel_name}}</h3>
+        <p>{{hotel.review_score}}</p>
+        <p>{{hotel.prices}}</p> 
+        <p>{{hotel.miles_from_downtown}}</p>
+        <p>{{hotel.extra_info}}</p>
+        {% endfor %}
+        </section>
+    </body>
+</html>
