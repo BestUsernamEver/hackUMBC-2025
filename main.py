@@ -22,6 +22,7 @@ def landing_page():
         trip_goal = request.form.get("purpose")
 
         # THERE HAS TO BE A BETTER WAY OF DOING THIS!! ITS 3:38 AM
+        # It's 7:50 and i would figure out a better way but i dont want to idiots
         summary_result = asyncio.run(get_general_summary(location))
         formatted_summary = json.loads(summary_result)
 
@@ -31,9 +32,6 @@ def landing_page():
         event_result = asyncio.run(get_local_events(location=location, goal=trip_goal))
         formatted_events = json.loads(event_result)
 
-        #print(num_of_people)
-        #print(stay_start)
-        #print(stay_end) This is not good this is not good at all. Someone has to die!!!!!
         hotels_result = asyncio.run(get_hotel_info(location, stay_start, stay_end, num_of_people, num_of_rooms))
         formatted_hotels = json.loads(hotels_result)
         print(formatted_hotels)
@@ -47,10 +45,6 @@ def landing_page():
         )
 
     return render_template("index.html")
-
-'''@app.route("/itinerary")
-def show_iternary():
-    return render_template("itinerary.html")'''
 
 if __name__ == "__main__":
     app.run()

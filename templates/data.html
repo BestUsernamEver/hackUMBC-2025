@@ -1,14 +1,10 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <style>
-            .relevant {
-                color: blueviolet;
-                font-weight: bold;
-            }
-        </style>
+        <link rel="stylesheet" href="https://cdn.simplecss.org/simple.css">
     </head>
     <body>
+        <p><br>Hotels and local events that are marked in red are more relevant to your travel plans.</p>
         <h1>Summary:</h1>
         <section>
             <h2>History</h2>
@@ -34,10 +30,14 @@
             </ul>
         </section>
 
-        <h1>Local events in the area:</h1>
+        <h1>Local/upcoming events in the area:</h1>
         <section>
         {% for event in events %}
-            <h3 class="{{ 'relevant' if event.relevant else '' }}">{{event.name}}</h3>
+            {% if event.relevant %}
+                <h3 style="color: red;">{{event.name}}</h3>
+            {% else %}
+                <h3 style="color: black;">{{event.name}}</h3>
+            {% endif %}
             <p>{{event.time}}</p>
             <p>{{event.area}}</p> 
         {% endfor %}
@@ -46,12 +46,16 @@
         <h1>Find a place to stay:</h1>
         <section>
         {% for hotel in hotels %}
-        <h3>{{hotel.hotel_name}}</h3>
-        <p>{{hotel.review_score}}</p>
-        <p>{{hotel.per_night_price}} per night</p> 
-        <p>{{hotel.total_price}}</p>
-        <p>{{hotel.miles_from_downtown}}m from downtown</p>
-        <p>{{hotel.extra_info}}</p>
+            {% if hotel.relevant %}
+                <h3 style="color: red;">{{hotel.hotel_name}}</h3>
+            {% else %}
+                <h3 style="color: black;">{{hotel.hotel_name}}</h3>
+            {% endif %}
+            <p>{{hotel.review_score}}</p>
+            <p>{{hotel.per_night_price}} per night</p> 
+            <p>{{hotel.total_price}}</p>
+            <p>{{hotel.miles_from_downtown}}m from downtown</p>
+            <p>{{hotel.extra_info}}</p>
         {% endfor %}
         </section>
     </body>

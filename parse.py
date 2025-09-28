@@ -25,6 +25,7 @@ CRAWLER_STRATEGY = AsyncPlaywrightCrawlerStrategy(
     browser_adapter = UNDETECTED_ADAPTER
 )
 
+# Use options to trim our markdown and lessen input tokens
 MD_GENERATOR = DefaultMarkdownGenerator(
     options = {
         "ignore_links": True,
@@ -33,6 +34,7 @@ MD_GENERATOR = DefaultMarkdownGenerator(
     }
 )
 
+# Initialize environment variables
 load_dotenv()
 
 # I'm too lazy to import dataclasses and make everything actually good. 
@@ -78,6 +80,11 @@ class Hotel(BaseModel):
     miles_from_downtown: str 
     extra_info: str
     relevant: bool
+
+def get_attraction_info(location, goal):
+    # Surprise, we're just going to call the AI outright here because TripAdvisor and Booking and Expedia are
+    # all out to try to kill me :(
+    pass
 
 async def check_existence(url, fail_msg, selector):
     run_config = CrawlerRunConfig(
@@ -136,9 +143,9 @@ async def get_information(url, extract_info, err_info = None):
         else:
             print("We were unable to properly result the thing or something?")
 
-async def get_hotel_info(location, start, end, person_num=1, room_num=1):
+async def get_hotel_info(location, start, end, goal, person_num=1, room_num=1):
     extract_info = ExtractInfo(
-        instruction = "For each listed hotel, extract its name (\"hotel_name\"), review score (\"review_score\"), prices (\"per_night_price\" and \"total_price\"), number of miles from downtown (\"miles_from_downtown\"), and any extra info (\"extra_info\") that might be important.",
+        instruction = f"For each listed hotel, extract its name (\"hotel_name\"), review score (\"review_score\"), prices (\"per_night_price\" and \"total_price\"), number of miles from downtown (\"miles_from_downtown\"), and any extra info (\"extra_info\") that might be important. Mark the hotel as relevant if it especially aligns with the user's purpose of visiting, which is: {goal}",
         schema = Hotel.model_json_schema(),
         css_selector = ".cca574b93c"
     )
@@ -194,7 +201,7 @@ async def get_general_summary(location):
 '''
 async def main():
     #await get_general_summary("Bowie")
-    print(await get_local_events("Bowie", "to embrace the arts"))
+    #print(await get_local_events("Bowie", "to embrace the arts"))
 
     #await get_general_summary()
 
