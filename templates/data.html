@@ -23,11 +23,22 @@
         <section>
             <ul>
             {% for route in routes %}
-                <li>{{route.travel_methods}}</li>
+                <li><strong>{{route.travel_methods}}</strong></li>
                 <li>{{route.time}}</li>
                 <li>{{route.price_range}}</li>
             {% endfor %}
             </ul>
+        </section>
+
+        <h1>Attractions:</h1>
+        <section>
+        {% for attraction in attractions %}
+            <h3>{{attraction.name}}</h3>
+            <ul>
+                <li>{{attraction.location}}</li>
+                <li>{{attraction.description}}</li>  
+            </ul>
+        {% endfor %}
         </section>
 
         <h1>Local/upcoming events in the area:</h1>

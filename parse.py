@@ -5,6 +5,7 @@ from crawl4ai.markdown_generation_strategy import DefaultMarkdownGenerator
 from crawl4ai.content_filter_strategy import BM25ContentFilter
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
+from google import genai
 import asyncio
 import json
 import os
@@ -81,10 +82,24 @@ class Hotel(BaseModel):
     extra_info: str
     relevant: bool
 
+class Attraction(BaseModel):
+    name: str 
+    location: str 
+    description: str 
+
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 def get_attraction_info(location, goal):
     # Surprise, we're just going to call the AI outright here because TripAdvisor and Booking and Expedia are
-    # all out to try to kill me :(
-    pass
+    # all out to try to kill me :( This is horrid btw
+    response = client.models.generate_content(
+        model = "gemini-2.5-flash",
+        contents = f"Describe 10 (or less, depends on what is available) different attractions at {location} that align with the user's goal of visiting, which is: {goal}",
+        config = {
+            "response_mime_type": "application/json",
+            "response_schema": list[Attraction]
+        }
+    )
+    return response.text
 
 async def check_existence(url, fail_msg, selector):
     run_config = CrawlerRunConfig(
@@ -211,3 +226,5 @@ async def main():
 if __name__ == "__main__":
     asyncio.run(main())
 '''
+
+print(get_attraction_info("Carson City", "sightseeing"))

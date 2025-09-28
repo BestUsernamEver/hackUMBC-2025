@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template
-from parse import get_general_summary, get_path, get_local_events, get_hotel_info
+from parse import get_general_summary, get_path, get_local_events, get_hotel_info, get_attraction_info
 import asyncio
 import json
 import os
@@ -13,6 +13,7 @@ app = Flask(__name__)
 @app.route("/", methods = ["GET", "POST"])
 def landing_page():
     if request.method == "POST":
+        # horrid but we move anyway
         location = request.form.get("location")
         origin = request.form.get("origin")
         num_of_people = request.form.get("num_of_companions")
@@ -21,8 +22,7 @@ def landing_page():
         num_of_rooms = request.form.get("num_of_rooms")
         trip_goal = request.form.get("purpose")
 
-        # THERE HAS TO BE A BETTER WAY OF DOING THIS!! ITS 3:38 AM
-        # It's 7:50 and i would figure out a better way but i dont want to idiots
+        # It's 7:50 now (wholly sentient) and i would figure out a better way but i dont want to 
         summary_result = asyncio.run(get_general_summary(location))
         formatted_summary = json.loads(summary_result)
 
@@ -34,14 +34,17 @@ def landing_page():
 
         hotels_result = asyncio.run(get_hotel_info(location, stay_start, stay_end, num_of_people, num_of_rooms))
         formatted_hotels = json.loads(hotels_result)
-        print(formatted_hotels)
+
+        attractions_result = get_attraction_info(location, trip_goal)
+        formatted_attractions = json.loads(attractions_result)
 
         return render_template(
             "data.html", 
             summary = formatted_summary[0], #??? Yeah deal with it
             routes = formatted_routes,
             events = formatted_events,
-            hotels = formatted_hotels
+            hotels = formatted_hotels,
+            attractions = formatted_attractions
         )
 
     return render_template("index.html")
