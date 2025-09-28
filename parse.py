@@ -35,7 +35,7 @@ MD_GENERATOR = DefaultMarkdownGenerator(
 
 load_dotenv()
 
-# I'm too lazy to import dataclasses and make everything actually good.
+# I'm too lazy to import dataclasses and make everything actually good. 
 class ErrorInfo:
     def __init__(self, err_msg, css_selector):
         self.err_msg = err_msg 
@@ -50,7 +50,7 @@ class ExtractInfo:
 class Summary(BaseModel):
     history: str 
     transportation: str 
-    thingsToDo: str 
+    things_to_do: str 
     food: str 
     hotels: str 
 
@@ -58,6 +58,7 @@ class Event(BaseModel):
     name: str 
     time: str 
     area: str 
+    relevant: bool
     #price: str
 
 class EventList(BaseModel):
@@ -67,6 +68,7 @@ class TravelPath(BaseModel):
     travel_methods: str 
     time: str 
     price_range: str
+    relevant: bool
 
 class Hotel(BaseModel):
     hotel_name: str 
@@ -75,6 +77,7 @@ class Hotel(BaseModel):
     per_night_price: str 
     miles_from_downtown: str 
     extra_info: str
+    relevant: bool
 
 async def check_existence(url, fail_msg, selector):
     run_config = CrawlerRunConfig(
@@ -135,7 +138,7 @@ async def get_information(url, extract_info, err_info = None):
 
 async def get_hotel_info(location, start, end, person_num=1, room_num=1):
     extract_info = ExtractInfo(
-        instruction = "For each listed hotel, extract its name, review score, prices (time-specific and per night), number of miles from downtown, and any extra info that might be important.",
+        instruction = "For each listed hotel, extract its name (\"hotel_name\"), review score (\"review_score\"), prices (\"per_night_price\" and \"total_price\"), number of miles from downtown (\"miles_from_downtown\"), and any extra info (\"extra_info\") that might be important.",
         schema = Hotel.model_json_schema(),
         css_selector = ".cca574b93c"
     )
@@ -156,14 +159,14 @@ async def get_path(location, origin):
     info = await get_information(url, extract_info)
     return info
 
-async def get_local_events(location):
+async def get_local_events(location, goal):
     err_info = ErrorInfo( # there was a note here but i think it's irrelvant now but if it becomes weird just know 
         err_msg = "Whoops, the page or event you are looking for was not found.",
         css_selector = "h1"
     )
 
     extract_info = ExtractInfo(
-        instruction = "Extract the name, time, area, and price of each listed event.",
+        instruction = f"Extract the name (\"name\"), time (\"time\"), area (\"area\"), and price (\"price\") of each listed event. Mark the event as relevant if it especially aligns with the user's purpose of visiting, which is: {goal}",
         schema = EventList.model_json_schema(),
         css_selector = ".SearchResultPanelContentEventCardList-module__eventList___2wk-D"
     )
@@ -180,7 +183,7 @@ async def get_general_summary(location):
     )
 
     extract_info = ExtractInfo(
-        instruction = "Extract short summary from the article about the destination's history, transportation, things to do, food, and hotels. If there is no/insufficient information on a topic, replace with 'Little information.'.",
+        instruction = "Extract short summary from the article about the destination's history (\"history\"), transportation (\"transportation\"), things to do (\"things_to_do\"), food (\"food\"), and hotels (\"hotels\"). If there is no/insufficient information on a certain topic, replace the summary for that topic with 'Little information.'.",
         schema = Summary.model_json_schema(),
         css_selector = ".mw-content-ltr"
     )
@@ -191,12 +194,13 @@ async def get_general_summary(location):
 '''
 async def main():
     #await get_general_summary("Bowie")
-    #await get_local_events()
+    print(await get_local_events("Bowie", "to embrace the arts"))
 
     #await get_general_summary()
 
     #await get_path()
-    print(await get_hotel_info('Bowie', '2025-09-28', '2025-09-30', 1, 1) )
+    #print(await get_hotel_info('Bowie', '2025-09-28', '2025-09-30', 1, 1) )
 
 if __name__ == "__main__":
-    asyncio.run(main())'''
+    asyncio.run(main())
+'''

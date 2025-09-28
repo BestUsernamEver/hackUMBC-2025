@@ -19,6 +19,7 @@ def landing_page():
         stay_start = request.form.get("time_of_start_stay")
         stay_end = request.form.get("time_of_end_stay")
         num_of_rooms = request.form.get("num_of_rooms")
+        trip_goal = request.form.get("purpose")
 
         # THERE HAS TO BE A BETTER WAY OF DOING THIS!! ITS 3:38 AM
         summary_result = asyncio.run(get_general_summary(location))
@@ -27,7 +28,7 @@ def landing_page():
         route_result = asyncio.run(get_path(location=location, origin=origin))
         formatted_routes = json.loads(route_result)
 
-        event_result = asyncio.run(get_local_events(location=location))
+        event_result = asyncio.run(get_local_events(location=location, goal=trip_goal))
         formatted_events = json.loads(event_result)
 
         #print(num_of_people)

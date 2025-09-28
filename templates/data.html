@@ -1,5 +1,13 @@
 <!DOCTYPE html>
 <html>
+    <head>
+        <style>
+            .relevant {
+                color: blueviolet;
+                font-weight: bold;
+            }
+        </style>
+    </head>
     <body>
         <h1>Summary:</h1>
         <section>
@@ -29,7 +37,7 @@
         <h1>Local events in the area:</h1>
         <section>
         {% for event in events %}
-            <h3>{{event.name}}</h3>
+            <h3 class="{{ 'relevant' if event.relevant else '' }}">{{event.name}}</h3>
             <p>{{event.time}}</p>
             <p>{{event.area}}</p> 
         {% endfor %}
@@ -40,8 +48,9 @@
         {% for hotel in hotels %}
         <h3>{{hotel.hotel_name}}</h3>
         <p>{{hotel.review_score}}</p>
-        <p>{{hotel.prices}}</p> 
-        <p>{{hotel.miles_from_downtown}}</p>
+        <p>{{hotel.per_night_price}} per night</p> 
+        <p>{{hotel.total_price}}</p>
+        <p>{{hotel.miles_from_downtown}}m from downtown</p>
         <p>{{hotel.extra_info}}</p>
         {% endfor %}
         </section>
